@@ -46,7 +46,7 @@ REMINDERS_CONFIG_DEFAULT: Dict[str, str] = {
 def save_json(filename: str, json_data: Dict[str, str]):
     """Overwrite destination file with json data"""
     with open(filename, "w") as f:
-        json.dump(json_data, f)
+        json.dump(json_data, f, indent=1)
 
 
 def add_default_values_to_json(
