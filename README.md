@@ -21,8 +21,8 @@ Written with pure Python 3.8+ for Linux or WSL, although it probably works anywh
 ## Example of reminders.json
 ```
 {
-    "09:00": "morning jog",
-    "14:00": "drink water",
+    "09:00": "Time for breakfast",
+    "14:00": "You should drink water",
 }
 ```
 

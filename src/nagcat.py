@@ -1,5 +1,5 @@
 """Plain nagcat command, which checks for reminders and prints =^.^= or [!!!]"""
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 import os
 import tempfile
 import glob
@@ -13,7 +13,7 @@ from . import logger
 TMP_DIR = os.path.join(tempfile.gettempdir(), "nagcat-litterbox")
 
 
-def safe_name(name) -> str:
+def safe_name(name: str) -> str:
     """Make reminder text into a safe filename, trimmed to 40 characters max"""
     return re.sub(f"[{re.escape(string.punctuation)}]", "", name).replace(" ", "_")[:40]
 
@@ -26,13 +26,14 @@ def create_litterbox() -> bool:
     return False
 
 
-def create_text_file(filepath) -> None:
-    """Creates an empty text file at filepath"""
+def create_text_file(filepath: str, content: str = "") -> None:
+    """Creates a string in a text file at filepath"""
     with open(filepath, "w") as f:
-        f.write("")
+        f.write(content)
 
 
 def get_current_time() -> Tuple[int, int]:
+    """Return tuple of ints: (hour, minute) in 24-hour time"""
     current_time = datetime.datetime.now()
     return current_time.hour, current_time.minute
 
@@ -68,7 +69,7 @@ def use_litterbox(reminders: Dict[str, str]) -> None:
         ):
             os.remove(reminder_file)  # remove _0 file
             reminder_file = f"{os.path.join(TMP_DIR, safe_name(reminder_text))}_1"
-            create_text_file(reminder_file)  # create _1 file
+            create_text_file(reminder_file, reminder_text)  # create _1 file
 
 
 def date_has_changed() -> bool:
@@ -116,7 +117,36 @@ def nagcat_pet(main_config: Dict[str, str], reminders: Dict[str, str]) -> int:
 
 def nagcat_why(main_config: Dict[str, str], reminders: Dict[str, str]) -> int:
     """Figures out why nagcat is nagging and prints a cute message"""
-    print(f"Because {main_config['name']} loves you {main_config['face']}")
+
+    def nagcat_ponder_why() -> Optional[str]:
+        """
+        Returns a string with the text for the first found reminder _1
+        or None if nothing can be found or an error occurs reading the files
+        If multiple reminders are found, also mentions the number.
+        """
+        nonlocal main_config, reminders
+        dirty_files = glob.glob(os.path.join(TMP_DIR, "*_1"))
+        reason = None
+        for reminder_file in dirty_files:
+            try:
+                with open(reminder_file, "r") as f:
+                    reason = f.readlines()[0].strip()
+                break
+            except Exception as e:
+                print(e)
+                reason = None
+
+        if reason:
+            reason = f"{reason} {main_config['face']}"
+            if len(dirty_files) > 1:
+                reason = f"{reason}\nAnd {len(dirty_files) - 1} more reasons as well..."
+
+        return reason
+
+    why = nagcat_ponder_why()
+    if why is not None:
+        print(why)
+    print(f"{main_config['name']} loves you <3")
     return 0
 
 

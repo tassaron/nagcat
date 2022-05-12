@@ -39,7 +39,7 @@ MAIN_CONFIG_DEFAULT: Dict[str, str] = {
 
 
 REMINDERS_CONFIG_DEFAULT: Dict[str, str] = {
-    "14:00": "drink water",
+    "14:00": "You should drink water",
 }
 
 
