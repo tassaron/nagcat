@@ -15,8 +15,9 @@ def create_argparser() -> argparse.ArgumentParser:
     """Create and return an argparser for this command entrypoint"""
     main_config = load_main_config()
     parser = argparse.ArgumentParser(
-        description="A helpful cat which nags you from within the tmux statusbar... because she loves you!",
-        epilog=main_config["catface"],
+        description=f"{main_config['name']}, who nags you from within the tmux statusbar..."
+        f"because {main_config['pronoun']} love{'s' if main_config['pronoun'] != 'they' else ''} you!",
+        epilog=main_config["face"],
     )
     parser.add_argument(
         "suggestion",
