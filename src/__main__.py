@@ -6,6 +6,7 @@ import argparse
 
 from .config import load_all_config, load_main_config
 from .config import main as config_main
+from .nagcat import nagcat_why, nagcat_pet
 from .nagcat import main as nagcat_main
 from . import logger
 
@@ -20,7 +21,7 @@ def create_argparser() -> argparse.ArgumentParser:
     parser.add_argument(
         "suggestion",
         help=f"suggest something for {main_config['name']} to do",
-        choices=["config"],
+        choices=["config", "pet", "why"],
     )
 
     return parser
@@ -35,9 +36,15 @@ def main() -> int:
     # parse only the suggestion to begin with
     args = parser.parse_args(sys.argv[1:2])
 
-    # pass remaining arguments into subcommands
     if args.suggestion == "config":
+        # pass remaining arguments into config subcommand
         return config_main(sys.argv[2:])
+
+    elif args.suggestion == "pet":
+        return nagcat_pet(*load_all_config())
+
+    elif args.suggestion == "why":
+        return nagcat_why(*load_all_config())
 
     return 1
 

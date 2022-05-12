@@ -15,7 +15,7 @@ TMP_DIR = os.path.join(tempfile.gettempdir(), "nagcat-litterbox")
 
 def safe_name(name) -> str:
     """Make reminder text into a safe filename, trimmed to 40 characters max"""
-    return re.sub(f'[{re.escape(string.punctuation)}]', '', name).replace(" ","_")[:40]
+    return re.sub(f"[{re.escape(string.punctuation)}]", "", name).replace(" ", "_")[:40]
 
 
 def create_litterbox() -> bool:
@@ -57,16 +57,18 @@ def use_litterbox(reminders: Dict[str, str]) -> None:
 
     for str_time, reminder_text in reminders.items():
         reminder_file = f"{os.path.join(TMP_DIR, safe_name(reminder_text))}_0"
-        if not glob.glob(reminder_file):
+        if not os.path.exists(reminder_file):
+            # should be _1 or _2
             continue
-
         # Only consider reminders marked as _0 (in future for this day)
         reminder_hour, reminder_minute = get_time_from_str(str_time)
         current_hour, current_minute = get_current_time()
-        if reminder_hour < current_hour or (reminder_hour == current_hour and reminder_minute < current_minute):
-            os.remove(reminder_file) # remove _0 file
+        if reminder_hour < current_hour or (
+            reminder_hour == current_hour and reminder_minute < current_minute
+        ):
+            os.remove(reminder_file)  # remove _0 file
             reminder_file = f"{os.path.join(TMP_DIR, safe_name(reminder_text))}_1"
-            create_text_file(reminder_file) # create _1 file
+            create_text_file(reminder_file)  # create _1 file
 
 
 def date_has_changed() -> bool:
@@ -89,15 +91,32 @@ def reminders_pending(reminders: Dict[str, str]) -> bool:
     If the current day changes, all reminders get deleted from the litterbox
     """
     if date_has_changed():
-        for reminder in glob.glob(os.path.join(TMP_DIR, "reminder_")):
+        dirty_files = glob.glob(os.path.join(TMP_DIR, "*_1"))
+        dirty_files.extend(glob.glob(os.path.join(TMP_DIR, "*_2")))
+        for reminder in dirty_files:
             os.remove(reminder)
 
-    pending_files_in_litterbox = lambda: len(glob.glob(os.path.join(TMP_DIR, "*_1"))) > 0
+    pending_files_in_litterbox = (
+        lambda: len(glob.glob(os.path.join(TMP_DIR, "*_1"))) > 0
+    )
     if pending_files_in_litterbox():
         return True
 
     use_litterbox(reminders)
     return pending_files_in_litterbox()
+
+
+def nagcat_pet(main_config: Dict[str, str], reminders: Dict[str, str]) -> int:
+    """Replace all _1 files in the litterbox with _2 files"""
+    for reminder_file in glob.glob(os.path.join(TMP_DIR, "*_1")):
+        os.remove(reminder_file)
+        create_text_file(f"{reminder_file[:-1]}2")
+    return 0
+
+
+def nagcat_why(main_config: Dict[str, str], reminders: Dict[str, str]) -> int:
+    print("idk!")
+    return 0
 
 
 def main(main_config: Dict[str, str], reminders: Dict[str, str]) -> int:
