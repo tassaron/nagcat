@@ -1,6 +1,6 @@
 # nagcat
 
-A helpful cat which nags you from within the tmux statusbar... because she loves you!
+A helpful cat which nags you from the tmux statusbar... because she loves you! *(Cat pronoun can be customized.)*
 
 The kitty doesn't actively notify you at a specific time. If a reminder is set for 2pm, she might not notice for a while. But eventually she'll put a little reminder in the statusbar! Until then, you can always `nagcat pet` her for comfort or to snooze a reminder. For a reminder of what your reminder is, say `nagcat why` to the kitty 🐈
 
@@ -13,8 +13,7 @@ The nagcat tmux plugin is written for Bash 4, although it should work with Bash 
 
 * By default, nagcat will return `=^.^=` if you have no reminders pending
 * nagcat will return [!!!] if you should drink water (once per day at 2pm)
-* Customizable with simple JSON files. Currently supports multiple daily reminders at customizable time.
-* Customizable cat face, name, and pronouns!
+* Reminders are stored in a simple JSON file editable with `nagcat config`
 * Try `nagcat -h` for a full list of "commands" (nagcat likes to think of them as "suggestions")
 
 
@@ -36,6 +35,11 @@ The nagcat tmux plugin is written for Bash 4, although it should work with Bash 
 1. If new keys are added to the config file in an update, nagcat will write default values into the config when it needs them.
 
 
-## Note
+## Development
 
 * Free the three! `sudo apt install python-is-python3` =^.^=
+* Use black formatter: `pip install black` and use `black` command
+* Run tests: `pip install pytest` and use `pytest` command
+* Handle cross-module concerns in `__main__.py` so the imports don't get out of hand
+    * The only inter-package import should be the `logger` from `__init__.py`
+* In this house, we use typehints for some reason 🤷‍♀️
