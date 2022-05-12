@@ -48,4 +48,5 @@ setup(
     entry_points={
         "console_scripts": [f"{PACKAGE_NAME} = {PACKAGE_NAME}.__main__:main"],
     },
+    scripts=["nagcat.tmux"],
 )
