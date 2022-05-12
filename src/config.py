@@ -177,6 +177,11 @@ def create_argparser(main_config: Dict[str, str]) -> argparse.ArgumentParser:
         nargs=1,
     )
     parser.add_argument(
+        "-alert",
+        help=f"change {main_config['alert']} to something else",
+        nargs=1,
+    )
+    parser.add_argument(
         "-editor",
         help=f"set text editor for editing reminders.json",
         nargs=1,
@@ -234,6 +239,9 @@ def main(argv: List) -> int:
 
     if args.face:
         main_config["face"] = args.face[0].strip()
+
+    if args.alert:
+        main_config["alert"] = args.alert[0].strip()
 
     if args.editor:
         main_config["editor"] = args.editor[0].strip()
