@@ -20,11 +20,21 @@ MAIN_CONFIG_FILE = os.path.join(CONFIG_DIR, "nagcat.json")
 REMINDERS_CONFIG_FILE = os.path.join(CONFIG_DIR, "reminders.json")
 
 
+def find_editor():
+    try:
+        nano_path = subprocess.check_output(["which", "nano"]).decode("utf-8").strip()
+    except Exception as e:
+        print(e)
+        nano_path = "/usr/bin/nano"
+    return os.getenv("EDITOR", nano_path)
+
+
 MAIN_CONFIG_DEFAULT: Dict[str, str] = {
-    "catface": "=^.^=",
-    "name": "Rosie",
+    "face": "=^.^=",
+    "alert": "=u.u=",
+    "name": "nagcat",
     "pronoun": "she",
-    "editor": os.getenv("EDITOR", "/usr/bin/nano"),
+    "editor": find_editor(),
 }
 
 
@@ -149,7 +159,7 @@ def create_argparser(main_config: Dict[str, str]) -> argparse.ArgumentParser:
     """Create and return an argparser for this commandline entrypoint"""
     parser = argparse.ArgumentParser(
         description=f"Tell {main_config['name']} how {main_config['pronoun']} can help you better",
-        epilog=main_config["catface"],
+        epilog=main_config["face"],
     )
     parser.add_argument(
         "-name",
@@ -163,7 +173,7 @@ def create_argparser(main_config: Dict[str, str]) -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "-face",
-        help=f"change {main_config['catface']} to something else",
+        help=f"change {main_config['face']} to something else",
         nargs=1,
     )
     parser.add_argument(
@@ -200,7 +210,7 @@ def main(argv: List) -> int:
         if output > 0 or not validate_reminders_file(REMINDERS_CONFIG_FILE, reminders):
             print("Nothing changed")
         else:
-            print(main_config["catface"])
+            print(main_config["face"])
         return 0
 
     parser = create_argparser(main_config)
@@ -223,7 +233,7 @@ def main(argv: List) -> int:
         main_config["pronoun"] = args.pronoun[0].strip()
 
     if args.face:
-        main_config["catface"] = args.face[0].strip()
+        main_config["face"] = args.face[0].strip()
 
     if args.editor:
         main_config["editor"] = args.editor[0].strip()

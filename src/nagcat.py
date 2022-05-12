@@ -115,7 +115,8 @@ def nagcat_pet(main_config: Dict[str, str], reminders: Dict[str, str]) -> int:
 
 
 def nagcat_why(main_config: Dict[str, str], reminders: Dict[str, str]) -> int:
-    print("idk!")
+    """Figures out why nagcat is nagging and prints a cute message"""
+    print(f"Because {main_config['name']} loves you {main_config['face']}")
     return 0
 
 
@@ -127,9 +128,9 @@ def main(main_config: Dict[str, str], reminders: Dict[str, str]) -> int:
         use_litterbox(reminders)
 
     if reminders_pending(reminders):
-        print("[!!!]", end="")
+        print(main_config["alert"], end="")
     else:
-        print(main_config["catface"], end="")
+        print(main_config["face"], end="")
     return 0
 
 
