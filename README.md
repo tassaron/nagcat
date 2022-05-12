@@ -1,20 +1,31 @@
 # nagcat
 
-A helpful cat which nags you from the tmux statusbar... because she loves you! *(Cat pronoun can be customized.)*
+A helpful cat which nags you from the tmux statusbar... because she loves you! *(Cat name and pronoun can be customized.)*
 
-The kitty doesn't actively notify you at a specific time. If a reminder is set for 2pm, she might not notice for a while. But eventually she'll put a little reminder in the statusbar! Until then, you can always `nagcat pet` her for comfort or to snooze a reminder. For a reminder of what your reminder is, say `nagcat why` to the kitty 🐈
+nagcat doesn't actively notify you at a specific time. If a reminder is set for 9 in the morning, she might not notice for a while; so it's not an alarm clock! nagcat will put a little `[!!!]` in the statusbar sometime after your reminder is set to trigger, as a friendly nag! :)
 
-Written with pure Python 3.8+ for Linux, though I would like to support macOS and Windows too! Please submit an issue or pull request if you have any problems or suggestions for improvement.
+Use `nagcat pet` to dismiss the reminder. For a reminder of what the reminder is, say `nagcat why` 🐈
 
-The nagcat tmux plugin is written for Bash 4, although it should work with Bash 3 as well.
+Written with pure Python 3.8+ for Linux or WSL, although it probably works anywhere with modern versions of Python, Bash, and tmux. Please submit an issue or pull request if you have any problems or suggestions for improvement.
 
 
 ## Quick overview
 
 * By default, nagcat will return `=^.^=` if you have no reminders pending
-* nagcat will return [!!!] if you should drink water (once per day at 2pm)
+* By default, nagcat will return `[!!!]` if you should drink water, after 14:00, until you `nagcat pet` her
 * Reminders are stored in a simple JSON file editable with `nagcat config`
 * Try `nagcat -h` for a full list of "commands" (nagcat likes to think of them as "suggestions")
+
+
+## Example of reminders.json
+```
+{
+    "09:00": "morning jog",
+    "14:00": "drink water",
+}
+```
+
+nagcat currently only supports 24-hour time and daily reminders.
 
 
 ## Installation
