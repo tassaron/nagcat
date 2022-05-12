@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 nagcat_str="\#{nagcat}"
-nagcat_cmd="$(nagcat)"
+nagcat_cmd="#(nagcat)"
 
 get_tmux_option() {
     local option=$1
