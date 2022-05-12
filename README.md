@@ -12,10 +12,11 @@ Written with pure Python 3.8+ for Linux or WSL, although it probably works anywh
 ## Quick overview
 
 * By default, nagcat will return `=^.^=` if you have no reminders pending
-* By default, nagcat will return `[!!!]` if you should drink water, after 14:00, until you `nagcat pet` her
+* By default, nagcat will return `=u.u=` if you should drink water, after 14:00, until you `nagcat pet` her
 * Reminders are stored in a simple JSON file editable with `nagcat config`
 * Try `nagcat -h` for a full list of "commands" (nagcat likes to think of them as "suggestions")
-
+* Easily customize nagcat's name, pronoun, and appearance - see `nagcat config -h` for details
+    * If you want to change `=u.u=` to something like `!!!` using the CLI, do `nagcat config -alert \!\!\!`
 
 ## Example of reminders.json
 ```
