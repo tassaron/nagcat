@@ -99,14 +99,49 @@ def load_all_config() -> Tuple[Dict[str, str], Dict[str, str]]:
     return main_config, reminders
 
 
-def validate_reminders(reminders: Dict[str, str]) -> bool:
-    """Return False if dictionary values are not unique"""
-    seen_values = set()
-    for text in reminders.values():
-        if text in seen_values:
-            print("Two reminders cannot have the same text")
-            return False
-        seen_values.add(text)
+def validate_reminders_file(reminder_file: str, good_reminders: Dict[str, str]) -> bool:
+    """Opens json file and loads it, return False if dictionary values are not unique"""
+
+    def repair_file():
+        nonlocal reminder_file, good_reminders
+        with open(reminder_file, "w") as f:
+            json.dump(good_reminders, f)
+
+    valid = True
+    with open(reminder_file, "r") as f:
+        try:
+            reminders: Dict[str, str] = json.load(f)
+        except Exception:
+            print("Error parsing JSON file")
+            valid = False
+
+    if valid:
+        seen_values = set()
+        for text in reminders.values():
+            if text in seen_values:
+                print("Two reminders cannot have the same text")
+                valid = False
+                break
+
+            seen_values.add(text)
+
+    if valid:
+        for time in reminders:
+            try:
+                h, m = time.split(":")
+                h = int(h)
+                m = int(m)
+                assert -1 < h < 24
+                assert -1 < m < 60
+            except (ValueError, AssertionError):
+                print(f"Badly formatted time: {time}")
+                valid = False
+                break
+
+    if not valid:
+        repair_file()
+        return False
+
     return True
 
 
@@ -148,12 +183,12 @@ def create_argparser(main_config: Dict[str, str]) -> argparse.ArgumentParser:
 def main(argv: List) -> int:
     """Commandline entrypoint"""
     ensure_config_skeleton_exists()
-    main_config = load_main_config()
+    main_config, reminders = load_all_config()
 
     editor = main_config["editor"]
     if not editor:
         editor = os.getenv("EDITOR")
-        if not editor:
+        if not editor and not argv:
             print("Could not find your text editor!")
             print("Set the text editor with `nagcat config -e /path/to/editor`")
             print("or set the $EDITOR environment variable in your shell.")
@@ -162,7 +197,7 @@ def main(argv: List) -> int:
     if not argv:
         # start editor on reminders.json
         output = subprocess.call([editor, REMINDERS_CONFIG_FILE])
-        if output > 0 or not validate_reminders(REMINDERS_CONFIG_FILE):
+        if output > 0 or not validate_reminders_file(REMINDERS_CONFIG_FILE, reminders):
             print("Nothing changed")
         else:
             print(main_config["catface"])
