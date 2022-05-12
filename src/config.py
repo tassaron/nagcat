@@ -99,6 +99,17 @@ def load_all_config() -> Tuple[Dict[str, str], Dict[str, str]]:
     return main_config, reminders
 
 
+def validate_reminders(reminders: Dict[str, str]) -> bool:
+    """Return False if dictionary values are not unique"""
+    seen_values = set()
+    for text in reminders.values():
+        if text in seen_values:
+            print("Two reminders cannot have the same text")
+            return False
+        seen_values.add(text)
+    return True
+
+
 def create_argparser(main_config: Dict[str, str]) -> argparse.ArgumentParser:
     """Create and return an argparser for this commandline entrypoint"""
     parser = argparse.ArgumentParser(
@@ -151,7 +162,7 @@ def main(argv: List) -> int:
     if not argv:
         # start editor on reminders.json
         output = subprocess.call([editor, REMINDERS_CONFIG_FILE])
-        if output > 0:
+        if output > 0 or not validate_reminders(REMINDERS_CONFIG_FILE):
             print("Nothing changed")
         else:
             print(main_config["catface"])
