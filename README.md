@@ -2,7 +2,7 @@
 
 A helpful cat which nags you from the tmux statusbar... because she loves you! *(Cat name and pronoun can be customized.)*
 
-nagcat doesn't actively notify you at a specific time. If a reminder is set for 9 in the morning, she might not notice for a while; so it's not an alarm clock! nagcat will put a little `[!!!]` in the statusbar sometime after your reminder is set to trigger, as a friendly nag! :)
+nagcat doesn't actively notify you at a specific time. If a reminder is set for 9 in the morning, she might not notice for a while; so it's not an alarm clock! nagcat will put a little `=u.u=` in the statusbar sometime after your reminder is set to trigger, as a friendly nag! :)
 
 Use `nagcat pet` to dismiss the reminder. For a reminder of what the reminder is, say `nagcat why` 🐈
 
@@ -15,19 +15,8 @@ Written with pure Python 3.8+ for Linux or WSL, although it probably works anywh
 * By default, nagcat will return `=u.u=` if you should drink water, after 14:00, until you `nagcat pet` her
 * Reminders are stored in a simple JSON file editable with `nagcat config`
 * Try `nagcat -h` for a full list of "commands" (nagcat likes to think of them as "suggestions")
-* Easily customize nagcat's name, pronoun, and appearance - see `nagcat config -h` for details
-    * If you want to change `=u.u=` to something like `!!!` using the CLI, do `nagcat config -alert \!\!\!`
-
-
-## Example of reminders.json
-```
-{
-    "09:00": "Time for breakfast",
-    "14:00": "You should drink water",
-}
-```
-
-nagcat currently only supports 24-hour time and daily reminders.
+* Easily customize nagcat's name, pronoun, and appearance -- see `nagcat config -h`
+* To remove cat theming: `nagcat config -face '' -alert [\!]`
 
 
 ## Installation
@@ -41,15 +30,27 @@ nagcat currently only supports 24-hour time and daily reminders.
     * Add `#{nagcat}` to your tmux `status-right` or `status-left`
 
 
+## Example setup
+
+### ~/.config/nagcat/reminders.json **(safely edit with `nagcat config`)**
+```
+{
+    "09:00": "Time for breakfast",
+    "14:00": "You should drink water",
+}
+```
+
+nagcat currently only supports 24-hour time and daily reminders.
+
+### ~/.tmux.conf **(`nagcat` and `nagcat.tmux` must be on $PATH)**
+```
+set -g status-right '#{nagcat}'
+run-shell nagcat.tmux
+```
+
+
 ## Updating
 
 1. `pip install --upgrade nagcat` should be sufficient!
 
 1. If something goes wrong, try a "factory reset": `nagcat config --reset`
-
-
-## Development
-
-* Free the three! `sudo apt install python-is-python3` =^.^=
-* Use black formatter: `pip install black` and use `black` command
-* I'm using typehints for some reason 🤷‍♀️
