@@ -65,7 +65,7 @@ def add_default_values_to_json(
     for key in default_config:
         if key not in json_data:
             modified = True
-            json_data["key"] = default_config[key]
+            json_data[key] = default_config[key]
     if modified:
         save_json(config_file, json_data)
 
