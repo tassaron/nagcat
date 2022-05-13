@@ -35,6 +35,7 @@ setup(
     description=PACKAGE_DESCRIPTION,
     author=getTextFromFile("AUTHORS", "tassaron"),
     long_description=getTextFromFile("README.md", PACKAGE_DESCRIPTION),
+    long_description_content_type = "text/markdown",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Programming Language :: Python :: 3 :: Only",
