@@ -3,9 +3,10 @@ from typing import List, Tuple, Dict
 import os
 import json
 import argparse
+import shutil
 import subprocess
 
-from . import logger
+from . import TMP_DIR
 
 
 CONFIG_DIR = os.path.join(
@@ -27,6 +28,13 @@ def find_editor():
         print(e)
         nano_path = "/usr/bin/nano"
     return os.getenv("EDITOR", nano_path)
+
+
+EDITOR_ERROR_MSG = (
+    "Could not find your text editor! "
+    "Set the text editor with `nagcat config -e /path/to/editor` "
+    "or set the $EDITOR environment variable in your shell."
+)
 
 
 MAIN_CONFIG_DEFAULT: Dict[str, str] = {
@@ -57,7 +65,6 @@ def add_default_values_to_json(
     for key in default_config:
         if key not in json_data:
             modified = True
-            logger.info(f"Adding missing {key} key to {config_file}")
             json_data["key"] = default_config[key]
     if modified:
         save_json(config_file, json_data)
@@ -115,7 +122,7 @@ def validate_reminders_file(reminder_file: str, good_reminders: Dict[str, str]) 
     def repair_file():
         nonlocal reminder_file, good_reminders
         with open(reminder_file, "w") as f:
-            json.dump(good_reminders, f)
+            json.dump(good_reminders, f, indent=1)
 
     valid = True
     with open(reminder_file, "r") as f:
@@ -204,18 +211,30 @@ def main(argv: List) -> int:
     if not editor:
         editor = os.getenv("EDITOR")
         if not editor and not argv:
-            print("Could not find your text editor!")
-            print("Set the text editor with `nagcat config -e /path/to/editor`")
-            print("or set the $EDITOR environment variable in your shell.")
+            print(EDITOR_ERROR_MSG)
             return 1
 
     if not argv:
         # start editor on reminders.json
-        output = subprocess.call([editor, REMINDERS_CONFIG_FILE])
-        if output > 0 or not validate_reminders_file(REMINDERS_CONFIG_FILE, reminders):
-            print("Nothing changed")
-        else:
-            print(main_config["face"])
+        try:
+            subprocess.call([editor, REMINDERS_CONFIG_FILE])
+        except (FileNotFoundError, PermissionError) as e:
+            print(str(e))
+            print(EDITOR_ERROR_MSG)
+            return 1
+
+        if not validate_reminders_file(REMINDERS_CONFIG_FILE, reminders):
+            print(f"Nothing changed {main_config['alert']}")
+            return 1
+        try:
+            shutil.rmtree(TMP_DIR)
+        except FileNotFoundError:
+            pass
+        except PermissionError as e:
+            print("Encountered error while trying to clean the litterbox")
+            print(str(e))
+            return 1
+        print(main_config["face"])
         return 0
 
     parser = create_argparser(main_config)
@@ -225,9 +244,11 @@ def main(argv: List) -> int:
     # So we always return 0 because one of these conditions should be true
 
     if args.reset:
-        os.remove(MAIN_CONFIG_FILE)
-        os.remove(REMINDERS_CONFIG_FILE)
-        os.rmdir(CONFIG_DIR)
+        try:
+            shutil.rmtree(CONFIG_DIR)
+            shutil.rmtree(TMP_DIR)
+        except FileNotFoundError:
+            pass
         ensure_config_skeleton_exists()
         main_config = load_main_config()
 

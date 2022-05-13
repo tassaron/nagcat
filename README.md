@@ -18,6 +18,7 @@ Written with pure Python 3.8+ for Linux or WSL, although it probably works anywh
 * Easily customize nagcat's name, pronoun, and appearance - see `nagcat config -h` for details
     * If you want to change `=u.u=` to something like `!!!` using the CLI, do `nagcat config -alert \!\!\!`
 
+
 ## Example of reminders.json
 ```
 {
@@ -44,14 +45,11 @@ nagcat currently only supports 24-hour time and daily reminders.
 
 1. `pip install --upgrade nagcat` should be sufficient!
 
-1. If new keys are added to the config file in an update, nagcat will write default values into the config when it needs them.
+1. If something goes wrong, try a "factory reset": `nagcat config --reset`
 
 
 ## Development
 
 * Free the three! `sudo apt install python-is-python3` =^.^=
 * Use black formatter: `pip install black` and use `black` command
-* Run tests: `pip install pytest` and use `pytest` command
-* Handle cross-module concerns in `__main__.py` so the imports don't get out of hand
-    * The only inter-package import should be the `logger` from `__init__.py`
-* In this house, we use typehints for some reason 🤷‍♀️
+* I'm using typehints for some reason 🤷‍♀️

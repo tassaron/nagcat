@@ -3,17 +3,16 @@ Entrypoint for `python -m nagcat` or the nagcat command
 """
 import sys
 import argparse
+from typing import Dict
 
-from .config import load_all_config, load_main_config
+from .config import load_all_config
 from .config import main as config_main
 from .nagcat import nagcat_why, nagcat_pet
 from .nagcat import main as nagcat_main
-from . import logger
 
 
-def create_argparser() -> argparse.ArgumentParser:
+def create_argparser(main_config: Dict[str, str]) -> argparse.ArgumentParser:
     """Create and return an argparser for this command entrypoint"""
-    main_config = load_main_config()
     parser = argparse.ArgumentParser(
         description=f"{main_config['name']}, who nags you from within the tmux statusbar..."
         f"because {main_config['pronoun']} love{'s' if main_config['pronoun'] != 'they' else ''} you!",
@@ -29,11 +28,12 @@ def create_argparser() -> argparse.ArgumentParser:
 
 
 def main() -> int:
+    main_config, reminders = load_all_config()
     if len(sys.argv) < 2:
         # plain nagcat command, used by tmux or manual refresh
-        return nagcat_main(*load_all_config())
+        return nagcat_main(main_config, reminders)
 
-    parser = create_argparser()
+    parser = create_argparser(main_config)
     # parse only the suggestion to begin with
     args = parser.parse_args(sys.argv[1:2])
 
@@ -42,10 +42,10 @@ def main() -> int:
         return config_main(sys.argv[2:])
 
     elif args.suggestion == "pet":
-        return nagcat_pet(*load_all_config())
+        return nagcat_pet(main_config, reminders)
 
     elif args.suggestion == "why":
-        return nagcat_why(*load_all_config())
+        return nagcat_why(main_config, reminders)
 
     return 1
 

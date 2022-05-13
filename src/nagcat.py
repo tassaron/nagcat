@@ -7,10 +7,7 @@ import re
 import string
 import datetime
 
-from . import logger
-
-
-TMP_DIR = os.path.join(tempfile.gettempdir(), "nagcat-litterbox")
+from . import TMP_DIR
 
 
 def safe_name(name: str) -> str:
@@ -39,6 +36,7 @@ def get_current_time() -> Tuple[int, int]:
 
 
 def get_time_from_str(str_time: str) -> Tuple[int, int]:
+    """Splits a str such as '14:00' in the constituent hour and minute parts, as a tuple of ints"""
     hour, minute = str_time.split(":")
     return int(hour), int(minute)
 
@@ -49,7 +47,6 @@ def use_litterbox(reminders: Dict[str, str]) -> None:
     Checks if any daily reminder suffixed with _0 (in the future) is now in the past.
     If any are, then suffix is changed to _1 to indicate a need for nagging.
     """
-    logger.info("Using litterbox")
     for reminder_text in reminders.values():
         # create missing reminders as _0
         reminder_file = os.path.join(TMP_DIR, safe_name(reminder_text))
