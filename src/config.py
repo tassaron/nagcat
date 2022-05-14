@@ -57,6 +57,13 @@ def save_json(filename: str, json_data: Dict[str, str]):
         json.dump(json_data, f, indent=1)
 
 
+def get_json(filename: str) -> Dict[str, str]:
+    """Receives path to json file, returns the data as a dict[str, str]"""
+    with open(filename, "r") as f:
+        data = json.load(f)
+    return data
+
+
 def add_default_values_to_json(
     config_file: str, default_config: Dict[str, str], json_data: Dict[str, str]
 ) -> None:
@@ -70,11 +77,16 @@ def add_default_values_to_json(
         save_json(config_file, json_data)
 
 
-def get_json(filename: str) -> Dict[str, str]:
-    """Receives path to json file, returns the data as a dict[str, str]"""
-    with open(filename, "r") as f:
-        data = json.load(f)
-    return data
+def load_all_config() -> Tuple[Dict[str, str], Dict[str, str]]:
+    """
+    Creates config dirs & files if needed and loads the config, returning it to the caller
+    Also creates the temporary directory (filepath stored in global TMP_DIR) if it doesn't exist
+    """
+    ensure_config_skeleton_exists()
+    main_config = load_main_config()
+    reminders = load_reminders()
+
+    return main_config, reminders
 
 
 def load_main_config() -> Dict[str, str]:
@@ -102,18 +114,6 @@ def ensure_config_skeleton_exists() -> None:
     # create blank reminders.json if needed
     if not os.path.exists(REMINDERS_CONFIG_FILE):
         save_json(REMINDERS_CONFIG_FILE, REMINDERS_CONFIG_DEFAULT)
-
-
-def load_all_config() -> Tuple[Dict[str, str], Dict[str, str]]:
-    """
-    Creates config dirs & files if needed and loads the config, returning it to the caller
-    Also creates the temporary directory (filepath stored in global TMP_DIR) if it doesn't exist
-    """
-    ensure_config_skeleton_exists()
-    main_config = load_main_config()
-    reminders = load_reminders()
-
-    return main_config, reminders
 
 
 def validate_reminders_file(reminder_file: str, good_reminders: Dict[str, str]) -> bool:
