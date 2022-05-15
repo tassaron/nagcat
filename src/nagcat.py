@@ -1,13 +1,11 @@
 """Plain nagcat command, which checks for reminders and prints =^.^= or [!!!]"""
 from typing import Dict, Optional, Tuple
 import os
-import tempfile
 import glob
 import re
 import string
+import shutil
 import datetime
-
-from . import TMP_DIR
 
 
 def safe_name(name: str) -> str:
@@ -15,10 +13,10 @@ def safe_name(name: str) -> str:
     return re.sub(f"[{re.escape(string.punctuation)}]", "", name).replace(" ", "_")[:40]
 
 
-def create_litterbox() -> bool:
+def create_litterbox(litterbox_dir: str) -> bool:
     """Create a litterbox to store the nagcat's data"""
-    if not os.path.exists(TMP_DIR):
-        os.mkdir(TMP_DIR)
+    if not os.path.exists(litterbox_dir):
+        os.mkdir(litterbox_dir)
         return True
     return False
 
@@ -41,7 +39,7 @@ def get_time_from_str(str_time: str) -> Tuple[int, int]:
     return int(hour), int(minute)
 
 
-def use_litterbox(reminders: Dict[str, str]) -> None:
+def use_litterbox(reminders: Dict[str, str], litterbox_dir: str) -> None:
     """
     Adds reminders to litterbox if they are missing.
     Checks if any daily reminder suffixed with _0 (in the future) is now in the past.
@@ -49,12 +47,12 @@ def use_litterbox(reminders: Dict[str, str]) -> None:
     """
     for reminder_text in reminders.values():
         # create missing reminders as _0
-        reminder_file = os.path.join(TMP_DIR, safe_name(reminder_text))
+        reminder_file = os.path.join(litterbox_dir, safe_name(reminder_text))
         if not glob.glob(f"{reminder_file}_*"):
             create_text_file(f"{reminder_file}_0")
 
     for str_time, reminder_text in reminders.items():
-        reminder_file = f"{os.path.join(TMP_DIR, safe_name(reminder_text))}_0"
+        reminder_file = f"{os.path.join(litterbox_dir, safe_name(reminder_text))}_0"
         if not os.path.exists(reminder_file):
             # should be _1 or _2
             continue
@@ -65,21 +63,21 @@ def use_litterbox(reminders: Dict[str, str]) -> None:
             reminder_hour == current_hour and reminder_minute < current_minute
         ):
             os.remove(reminder_file)  # remove _0 file
-            reminder_file = f"{os.path.join(TMP_DIR, safe_name(reminder_text))}_1"
+            reminder_file = f"{os.path.join(litterbox_dir, safe_name(reminder_text))}_1"
             create_text_file(reminder_file, reminder_text)  # create _1 file
 
 
-def date_has_changed() -> bool:
-    """If TMP_DIR/<current_day> is nonexistent, returns True"""
+def date_has_changed(litterbox_dir: str) -> bool:
+    """If litterbox_dir/<current_day> is nonexistent, returns True"""
     current_day = datetime.datetime.now().day
-    datefile = os.path.join(TMP_DIR, str(current_day))
+    datefile = os.path.join(litterbox_dir, str(current_day))
     if not os.path.exists(datefile):
         create_text_file(datefile)
         return True
     return False
 
 
-def reminders_pending(reminders: Dict[str, str]) -> bool:
+def reminders_pending(reminders: Dict[str, str], litterbox_dir: str) -> bool:
     """
     Reminders are put in litterbox, suffixed with numbers to indicate state:
         0 - reminder is in the future on the current day
@@ -88,31 +86,60 @@ def reminders_pending(reminders: Dict[str, str]) -> bool:
 
     If the current day changes, all reminders get deleted from the litterbox
     """
-    if date_has_changed():
-        dirty_files = glob.glob(os.path.join(TMP_DIR, "*_1"))
-        dirty_files.extend(glob.glob(os.path.join(TMP_DIR, "*_2")))
+    if date_has_changed(litterbox_dir):
+        dirty_files = glob.glob(os.path.join(litterbox_dir, "*_1"))
+        dirty_files.extend(glob.glob(os.path.join(litterbox_dir, "*_2")))
         for reminder in dirty_files:
             os.remove(reminder)
 
     pending_files_in_litterbox = (
-        lambda: len(glob.glob(os.path.join(TMP_DIR, "*_1"))) > 0
+        lambda: len(glob.glob(os.path.join(litterbox_dir, "*_1"))) > 0
     )
     if pending_files_in_litterbox():
         return True
 
-    use_litterbox(reminders)
+    use_litterbox(reminders, litterbox_dir)
     return pending_files_in_litterbox()
 
 
-def nagcat_pet(main_config: Dict[str, str], reminders: Dict[str, str]) -> int:
+def nagcat_reset(
+    main_config: Dict[str, str], litterbox_dir: str, config_dir: str
+) -> int:
+    """Happens when doing `nagcat --reset` to delete all nagcat configuration and program state"""
+
+    def delete_dir(dir_name: str) -> int:
+        try:
+            shutil.rmtree(dir_name)
+        except FileNotFoundError as e:
+            return 1
+        return 0
+
+    delete_dir(litterbox_dir)
+    errcode = delete_dir(config_dir)
+    if errcode:
+        return errcode
+
+    if main_config["name"] != "nagcat":
+        print(f"{main_config['name']} turned back into nagcat...")
+    else:
+        print("nagcat reset!")
+
+    return 0
+
+
+def nagcat_pet(
+    main_config: Dict[str, str], reminders: Dict[str, str], litterbox_dir: str
+) -> int:
     """Replace all _1 files in the litterbox with _2 files"""
-    for reminder_file in glob.glob(os.path.join(TMP_DIR, "*_1")):
+    for reminder_file in glob.glob(os.path.join(litterbox_dir, "*_1")):
         os.remove(reminder_file)
         create_text_file(f"{reminder_file[:-1]}2")
     return 0
 
 
-def nagcat_why(main_config: Dict[str, str], reminders: Dict[str, str]) -> int:
+def nagcat_why(
+    main_config: Dict[str, str], reminders: Dict[str, str], litterbox_dir: str
+) -> int:
     """Figures out why nagcat is nagging and prints a cute message"""
 
     def nagcat_ponder_why() -> Optional[str]:
@@ -121,8 +148,8 @@ def nagcat_why(main_config: Dict[str, str], reminders: Dict[str, str]) -> int:
         or None if nothing can be found or an error occurs reading the files
         If multiple reminders are found, also mentions the number.
         """
-        nonlocal main_config, reminders
-        dirty_files = glob.glob(os.path.join(TMP_DIR, "*_1"))
+        nonlocal main_config, reminders, litterbox_dir
+        dirty_files = glob.glob(os.path.join(litterbox_dir, "*_1"))
         reason = None
         for reminder_file in dirty_files:
             try:
@@ -147,14 +174,16 @@ def nagcat_why(main_config: Dict[str, str], reminders: Dict[str, str]) -> int:
     return 0
 
 
-def main(main_config: Dict[str, str], reminders: Dict[str, str]) -> int:
+def main(
+    main_config: Dict[str, str], reminders: Dict[str, str], litterbox_dir: str
+) -> int:
     """Called when no subcommand is used, therefore does not receive argv as an argument"""
 
-    did_create_new_litterbox = create_litterbox()
+    did_create_new_litterbox = create_litterbox(litterbox_dir)
     if did_create_new_litterbox:
-        use_litterbox(reminders)
+        use_litterbox(reminders, litterbox_dir)
 
-    if reminders_pending(reminders):
+    if reminders_pending(reminders, litterbox_dir):
         print(main_config["alert"], end="")
     else:
         print(main_config["face"], end="")
@@ -162,6 +191,6 @@ def main(main_config: Dict[str, str], reminders: Dict[str, str]) -> int:
 
 
 if __name__ == "__main__":
-    from .config import load_all_config
+    from .__main__ import main
 
-    main(*load_all_config())
+    exit(main())

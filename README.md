@@ -24,7 +24,7 @@ You may use the included `nagcat.tmux` plugin for tmux, or simply use nagcat on 
 
 1. `pip install --upgrade nagcat`
 
-1. If something goes wrong, try a "factory reset" with `nagcat config --reset`
+1. If something goes wrong, try a "factory reset" with `nagcat --reset`
 
 
 ## Example setup

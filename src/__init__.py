@@ -1,7 +1,4 @@
-"""Always runs when importing nagcat package"""
-import os
-import tempfile
+"""A helpful cat which nags you from the tmux statusbar... because she loves you!"""
 
-TMP_DIR = os.path.join(tempfile.gettempdir(), "nagcat-litterbox")
 
 __version__ = "1.0.0"

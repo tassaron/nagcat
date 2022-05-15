@@ -6,8 +6,6 @@ import argparse
 import shutil
 import subprocess
 
-from . import TMP_DIR
-
 
 CONFIG_DIR = os.path.join(
     os.getenv("XDG_CONFIG_HOME", os.path.join(os.path.expanduser("~"), ".config")),
@@ -80,7 +78,6 @@ def add_default_values_to_json(
 def load_all_config() -> Tuple[Dict[str, str], Dict[str, str]]:
     """
     Creates config dirs & files if needed and loads the config, returning it to the caller
-    Also creates the temporary directory (filepath stored in global TMP_DIR) if it doesn't exist
     """
     ensure_config_skeleton_exists()
     main_config = load_main_config()
@@ -193,16 +190,11 @@ def create_argparser(main_config: Dict[str, str]) -> argparse.ArgumentParser:
         help=f"set text editor for editing reminders.json",
         nargs=1,
     )
-    parser.add_argument(
-        "--reset",
-        help="delete all nagcat files!",
-        action="store_true",
-    )
 
     return parser
 
 
-def main(argv: List) -> int:
+def main(argv: List, litterbox_dir: str) -> int:
     """Commandline entrypoint"""
     main_config, reminders = load_all_config()
 
@@ -226,7 +218,7 @@ def main(argv: List) -> int:
             print(f"Nothing changed {main_config['alert']}")
             return 1
         try:
-            shutil.rmtree(TMP_DIR)
+            shutil.rmtree(litterbox_dir)
         except FileNotFoundError:
             pass
         except PermissionError as e:
@@ -241,15 +233,6 @@ def main(argv: List) -> int:
 
     # At this point argparse has returned 1 or higher if args are bad
     # So we always return 0 because one of these conditions should be true
-
-    if args.reset:
-        try:
-            shutil.rmtree(CONFIG_DIR)
-            shutil.rmtree(TMP_DIR)
-        except FileNotFoundError:
-            pass
-        ensure_config_skeleton_exists()
-        main_config = load_main_config()
 
     if args.name:
         main_config["name"] = args.name[0].strip()
@@ -271,4 +254,6 @@ def main(argv: List) -> int:
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    exit(main(sys.argv))
