@@ -63,16 +63,19 @@ def get_json(filename: str) -> Dict[str, str]:
 
 
 def add_default_values_to_json(
-    config_file: str, default_config: Dict[str, str], json_data: Dict[str, str]
-) -> None:
-    """Substitute default values for any missing keys"""
+    default_config: Dict[str, str], json_data: Dict[str, str]
+) -> Tuple[Dict[str, str]]:
+    """
+    Receives default config and alleged new config,
+    Substitute default values for missing keys in new config,
+    returns a tuple: (dict[str, str], boolean)
+    """
     modified = False
     for key in default_config:
         if key not in json_data:
             modified = True
             json_data[key] = default_config[key]
-    if modified:
-        save_json(config_file, json_data)
+    return json_data, modified
 
 
 def load_all_config() -> Tuple[Dict[str, str], Dict[str, str]]:
@@ -87,9 +90,14 @@ def load_all_config() -> Tuple[Dict[str, str], Dict[str, str]]:
 
 
 def load_main_config() -> Dict[str, str]:
-    """Load nagcat.json as a dict[str, str]"""
+    """
+    Load nagcat.json as a dict[str, str]
+    Adds missing values to json data before returning data
+    """
     data = get_json(MAIN_CONFIG_FILE)
-    add_default_values_to_json(MAIN_CONFIG_FILE, MAIN_CONFIG_DEFAULT, data)
+    data, mutated = add_default_values_to_json(MAIN_CONFIG_DEFAULT, data)
+    if mutated:
+        save_json(MAIN_CONFIG_FILE, data)
     return data
 
 
