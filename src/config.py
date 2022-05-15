@@ -204,7 +204,6 @@ def create_argparser(main_config: Dict[str, str]) -> argparse.ArgumentParser:
 
 def main(argv: List) -> int:
     """Commandline entrypoint"""
-    ensure_config_skeleton_exists()
     main_config, reminders = load_all_config()
 
     editor = main_config["editor"]
