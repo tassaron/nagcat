@@ -1,6 +1,5 @@
 """Test the integration of nagcat's components in nagcat.main()"""
 import os
-import sys
 import tempfile
 import shutil
 import datetime
@@ -15,7 +14,7 @@ from test_config import config_dir
 
 
 @pytest.fixture
-def config_and_litterbox(config_dir):
+def config_dir_and_litterbox_dir(config_dir):
     # Create name of temporary directory for the litterbox
     litterbox_dir = tempfile.mktemp()
     # The test function is responsible for actually creating it
@@ -25,11 +24,11 @@ def config_and_litterbox(config_dir):
         shutil.rmtree(litterbox_dir)
 
 
-def test_nagcat_main_after_nag(config_and_litterbox):
+def test_nagcat_main_after_nag(config_dir_and_litterbox_dir):
     # Set current time to 14:00
     nagcat.get_datetime_now = lambda: datetime.datetime(2022, 5, 15, 14, 1)
 
-    _, litterbox_dir = config_and_litterbox
+    _, litterbox_dir = config_dir_and_litterbox_dir
     
     # Capture stdout output as a string using StringIO
     with StringIO() as fake_stdout, redirect_stdout(fake_stdout):
@@ -39,11 +38,11 @@ def test_nagcat_main_after_nag(config_and_litterbox):
     assert output == config.MAIN_CONFIG_DEFAULT["alert"]
 
 
-def test_nagcat_main_before_nag(config_and_litterbox):
+def test_nagcat_main_before_nag(config_dir_and_litterbox_dir):
     # Set current time to 9:00
     nagcat.get_datetime_now = lambda: datetime.datetime(2022, 5, 15, 9)
 
-    _, litterbox_dir = config_and_litterbox
+    _, litterbox_dir = config_dir_and_litterbox_dir
 
     # Capture stdout output as a string using StringIO
     with StringIO() as fake_stdout, redirect_stdout(fake_stdout):
