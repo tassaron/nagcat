@@ -1,5 +1,6 @@
-import tempfile
+"""Test nagcat litterbox functions"""
 import os
+import tempfile
 import shutil
 import pytest
 
@@ -21,6 +22,7 @@ def test_create_litterbox():
     success = nagcat.create_litterbox(litterbox_dir)
     assert success
     assert os.path.exists(litterbox_dir)
+    shutil.rmtree(litterbox_dir)
 
 
 def test_create_text_file(litterbox_dir):

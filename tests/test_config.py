@@ -1,3 +1,4 @@
+"""Test nagcat config module functions"""
 import os
 import tempfile
 import shutil

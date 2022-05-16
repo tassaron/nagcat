@@ -27,9 +27,13 @@ def create_text_file(filepath: str, content: str = "") -> None:
         f.write(content)
 
 
+def get_datetime_now():
+    return datetime.datetime.now()
+
+
 def get_current_time() -> Tuple[int, int]:
     """Return tuple of ints: (hour, minute) in 24-hour time"""
-    current_time = datetime.datetime.now()
+    current_time = get_datetime_now()
     return current_time.hour, current_time.minute
 
 
@@ -69,7 +73,7 @@ def use_litterbox(reminders: Dict[str, str], litterbox_dir: str) -> None:
 
 def date_has_changed(litterbox_dir: str) -> bool:
     """If litterbox_dir/<current_day> is nonexistent, returns True"""
-    current_day = datetime.datetime.now().day
+    current_day = get_datetime_now().day
     datefile = os.path.join(litterbox_dir, str(current_day))
     if not os.path.exists(datefile):
         create_text_file(datefile)
