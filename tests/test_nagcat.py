@@ -48,7 +48,7 @@ def test_reminders_pending_midday(config_and_litterbox):
     nagcat.get_datetime_now = lambda: datetime.datetime(2022, 5, 15)
     nagcat.use_litterbox(reminders, litterbox_dir)
     assert not nagcat.reminders_pending(reminders, litterbox_dir)
-    nagcat.get_datetime_now = lambda: datetime.datetime(2022, 5, 15, 14, 1)
+    nagcat.get_datetime_now = lambda: datetime.datetime(2022, 5, 15, 14)
     nagcat.use_litterbox(reminders, litterbox_dir)
     assert nagcat.reminders_pending(reminders, litterbox_dir)
 

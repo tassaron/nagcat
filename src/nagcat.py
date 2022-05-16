@@ -64,7 +64,7 @@ def use_litterbox(reminders: Dict[str, str], litterbox_dir: str) -> None:
         reminder_hour, reminder_minute = get_time_from_str(str_time)
         current_hour, current_minute = get_current_time()
         if reminder_hour < current_hour or (
-            reminder_hour == current_hour and reminder_minute < current_minute
+            reminder_hour == current_hour and reminder_minute <= current_minute
         ):
             os.remove(reminder_file)  # remove _0 file
             reminder_file = f"{os.path.join(litterbox_dir, safe_name(reminder_text))}_1"
