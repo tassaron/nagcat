@@ -45,14 +45,14 @@ def main(
     if len(sys.argv) < 2:
         # Plain nagcat command which returns the 'face' or 'alert'
         return nagcat_main(main_config, reminders, litterbox_dir)
-    elif sys.argv[1] == "--reset":
+    elif "--reset" in sys.argv:
         return_code = nagcat_reset(main_config, litterbox_dir, CONFIG_DIR)
         if return_code > 0 or len(sys.argv) == 2:
             return return_code
 
         main_config, reminders = load_all_config()
         # Remove --reset from argv
-        sys.argv = sys.argv[1:]
+        del sys.argv[sys.argv.index("--reset")]
 
     parser = create_argparser(main_config)
     # Parse only the suggestion to begin with
