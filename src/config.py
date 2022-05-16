@@ -198,6 +198,11 @@ def create_argparser(main_config: Dict[str, str]) -> argparse.ArgumentParser:
         help=f"set text editor for editing reminders.json",
         nargs=1,
     )
+    parser.add_argument(
+        "--reset",
+        help="delete all config files and reminder state",
+        action="store_true",
+    )
 
     return parser
 
