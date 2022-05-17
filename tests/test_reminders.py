@@ -9,7 +9,6 @@ import pytest
 import nagcat.nagcat as nagcat
 import nagcat.config as config
 from test_config import config_dir
-from test_litterbox import litterbox_dir
 
 
 @pytest.fixture
@@ -21,18 +20,6 @@ def config_and_litterbox(config_dir):
     # Remove temporary directory after test function
     if os.path.exists(litterbox_dir):
         shutil.rmtree(litterbox_dir)
-
-
-def test_date_has_changed(litterbox_dir):
-    nagcat.get_datetime_now = lambda: datetime.datetime(2022, 5, 15)
-    success = nagcat.date_has_changed(litterbox_dir)
-    assert success
-    success = nagcat.date_has_changed(litterbox_dir)
-    assert not success
-
-    nagcat.get_datetime_now = lambda: datetime.datetime(2022, 5, 16)
-    success = nagcat.date_has_changed(litterbox_dir)
-    assert success
 
 
 def test_use_litterbox(config_and_litterbox):
