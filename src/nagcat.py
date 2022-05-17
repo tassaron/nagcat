@@ -1,4 +1,4 @@
-"""Plain nagcat command, which checks for reminders and prints =^.^= or [!!!]"""
+"""Plain nagcat command, which checks for reminders and prints =^.^= or =u.u="""
 from typing import Dict, Optional, Tuple
 import os
 import glob

@@ -18,7 +18,6 @@ def getTextFromFile(filename, fallback):
 PACKAGE_NAME = "nagcat"
 SOURCE_DIRECTORY = "src"
 SOURCE_PACKAGE_REGEX = re.compile(rf"^{SOURCE_DIRECTORY}")
-PACKAGE_DESCRIPTION = "A helpful cat which nags you from within the tmux statusbar... because she loves you! =^.^="
 
 
 nagcat = import_module(SOURCE_DIRECTORY)
@@ -32,18 +31,23 @@ setup(
     name=PACKAGE_NAME,
     version=nagcat.__version__,
     url="https://github.com/tassaron/nagcat",
-    description=PACKAGE_DESCRIPTION,
+    description=nagcat.__doc__,
     author=getTextFromFile("AUTHORS", "tassaron"),
-    long_description=getTextFromFile("README.md", PACKAGE_DESCRIPTION),
+    author_email="brianna@rainey.tech",
+    long_description=getTextFromFile("README.md", nagcat.__doc__),
     long_description_content_type = "text/markdown",
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.10",
+        "Environment :: Console",
     ],
     keywords=[
+        "tmux",
         "reminder",
         "cat",
     ],
+    license="MIT",
     packages=proj_packages,
     package_dir={PACKAGE_NAME: SOURCE_DIRECTORY},
     entry_points={
