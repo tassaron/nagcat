@@ -1,6 +1,7 @@
 """Configuration module for nagcat"""
 from typing import List, Tuple, Dict
 import os
+import sys
 import json
 import argparse
 import shutil
@@ -267,6 +268,5 @@ def main(argv: List, litterbox_dir: str) -> int:
 
 
 if __name__ == "__main__":
-    import sys
-
-    exit(main(sys.argv))
+    # To avoid defining litterbox_dir in this file, use config.py through nagcat.py
+    print("To manage nagcat configuration, use `python nagcat.py config`")

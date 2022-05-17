@@ -1,6 +1,9 @@
 """Plain nagcat command, which checks for reminders and prints =^.^= or =u.u="""
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, List
 import os
+import sys
+import argparse
+import tempfile
 import glob
 import re
 import string
@@ -178,7 +181,7 @@ def nagcat_why(
     return 0
 
 
-def main(
+def nagcat_nag(
     main_config: Dict[str, str], reminders: Dict[str, str], litterbox_dir: str
 ) -> int:
     """Called when no subcommand is used, therefore does not receive argv as an argument"""
@@ -194,7 +197,74 @@ def main(
     return 0
 
 
-if __name__ == "__main__":
-    from .__main__ import main
+def create_argparser(main_config: Dict[str, str]) -> argparse.ArgumentParser:
+    """Create and return an argparser for this command entrypoint"""
+    parser = argparse.ArgumentParser(
+        description=f"{main_config['name']}, who nags you from within the tmux statusbar..."
+        f"because {main_config['pronoun']} love{'s' if main_config['pronoun'] != 'they' else ''} you!",
+        epilog=main_config["face"],
+    )
+    parser.add_argument(
+        "suggestion",
+        help=f"suggest something for {main_config['name']} to do",
+        choices=["config", "pet", "why"],
+    )
+    parser.add_argument(
+        "--reset",
+        help="delete all config files and reminder state",
+        action="store_true",
+    )
 
+    return parser
+
+
+def main(
+    argv: List[str] = sys.argv,
+    litterbox_dir: str = os.path.join(tempfile.gettempdir(), "nagcat-litterbox"),
+) -> int:
+    """
+    Entrypoint for nagcat command, `python -m nagcat`, or running nagcat.py directly
+    The nagcat "litterbox" is where we keep memory of the current day and reminders
+    """
+    try:
+        from .config import load_all_config, CONFIG_DIR
+        from .config import main as config_main
+    except ImportError:
+        from config import load_all_config, CONFIG_DIR
+        from config import main as config_main
+
+    main_config, reminders = load_all_config()
+    if len(sys.argv) < 2:
+        # Plain nagcat command which returns the 'face' or 'alert'
+        return nagcat_nag(main_config, reminders, litterbox_dir)
+    elif "--reset" in sys.argv:
+        return_code = nagcat_reset(main_config, litterbox_dir, CONFIG_DIR)
+        if return_code > 0 or len(sys.argv) == 2:
+            return return_code
+
+        main_config, reminders = load_all_config()
+        # Remove --reset from argv
+        del sys.argv[sys.argv.index("--reset")]
+
+    parser = create_argparser(main_config)
+    # Parse only the suggestion to begin with
+    args = parser.parse_args(sys.argv[1:2])
+
+    # At this point argparse has returned 1 or higher if args are bad
+
+    if args.suggestion == "config":
+        # pass remaining arguments into config subcommand
+        return config_main(sys.argv[2:], litterbox_dir)
+
+    elif args.suggestion == "pet":
+        return nagcat_pet(main_config, reminders, litterbox_dir)
+
+    elif args.suggestion == "why":
+        return nagcat_why(main_config, reminders, litterbox_dir)
+
+    # This should never occur, as argparse returned 1 above
+    raise NotImplementedError
+
+
+if __name__ == "__main__":
     exit(main())
