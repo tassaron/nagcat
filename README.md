@@ -47,19 +47,23 @@ You may use the included `nagcat.tmux` plugin for tmux, or simply use nagcat on 
 * Use TPM update command: `prefix` + <kbd>U</kbd>
 
 
+### Make an alias to TPM-installed version
+
+* Add to bottom of `.bashrc`:
+
+```
+alias nagcat="python $HOME/.tmux/plugins/nagcat/src/nagcat.py"
+```
+
+* Replace `python` with `python3` on some Linux distros (Debian, Ubuntu)
+
+
 ---
 
 
 ## Which Installation Method to Use?
 
-On most operating systems, installing with Pip will automatically put the `nagcat` command in the $PATH. Other than convenience and personal preference, there is no difference between the installation methods. You can safely install using both methods on the same system if you change your mind in the future.
-
-### Make an alias to TPM-installed version
-* Add to bottom of `.bashrc`:
-```
-alias nagcat="python $HOME/.tmux/plugins/nagcat/src nagcat.py"
-```
-* Replace `python` with `python3` on some Linux distros (Debian, Ubuntu)
+On most operating systems, installing with Pip will automatically put the `nagcat` command in the $PATH. Other than convenience and personal preference, there is no difference between the installation methods. You can install both ways on the same system, but you will have to update two versions of the program so it's not recommended.
 
 
 ---
