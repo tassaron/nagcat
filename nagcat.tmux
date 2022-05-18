@@ -7,18 +7,27 @@ find_python() {
         python=$(which python3)
     fi
     if [ $? -ne 0 ]; then
-        echo "Couldn't find Python interpreter"
+        echo "Couldn't find Python interpreter. `python` or `python3` must be findable in \$PATH"
         exit 1
     fi
     echo "$python"
 }
-
-
 NAGCAT_PYTHON=$(find_python)
+
+# Standard tmux plugin line:
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Find real path of nagcat.tmux because nagcat.py is not relative to the symlinked version
+# We could do this in Bash but Python is a hard requirement, and `readlink -f` isn't
+CURRENT_DIR="$NAGCAT_PYTHON -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' $CURRENT_DIR"
+
+
 nagcat_str="\#{nagcat}"
-nagcat_cmd="#($NAGCAT_PYTHON $CURRENT_DIR/src/nagcat.py)"
+nagcat_cmd="$(which nagcat)"
+if [ $? -ne 0 ]; then
+    nagcat_cmd="$NAGCAT_PYTHON $CURRENT_DIR/src/nagcat.py"
+fi
+
 
 get_tmux_option() {
     local option=$1
@@ -32,11 +41,11 @@ get_tmux_option() {
     fi
 }
 
-WHY_KEY=$(get_tmux_option "@nagcat_why" "e")
-PET_KEY=$(get_tmux_option "@nagcat_pet" "r")
+WHY_KEY=$(get_tmux_option "@nagcat_why" "W")
+PET_KEY=$(get_tmux_option "@nagcat_pet" "P")
 
-tmux bind-key $WHY_KEY run-shell "$NAGCAT_PYTHON $CURRENT_DIR/src/nagcat.py why"
-tmux bind-key $PET_KEY run-shell "$NAGCAT_PYTHON $CURRENT_DIR/src/nagcat.py pet"
+tmux bind-key $WHY_KEY run-shell "$nagcat_cmd why"
+tmux bind-key $PET_KEY run-shell "$nagcat_cmd pet"
 
 
 set_tmux_option() {
@@ -47,7 +56,8 @@ set_tmux_option() {
 
 do_interpolation() {
     local result="$1"
-    result="${result//${nagcat_str}/${nagcat_cmd}}"
+    local cmd="#(${nagcat_cmd})"
+    result="${result//${nagcat_str}/${cmd}}"
     echo "$result"
 }
 
