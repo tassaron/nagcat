@@ -12,20 +12,14 @@ find_python() {
     fi
     echo "$python"
 }
-NAGCAT_PYTHON=$(find_python)
 
 # Standard tmux plugin line:
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Find real path of nagcat.tmux because nagcat.py is not relative to the symlinked version
-# We could do this in Bash but Python is a hard requirement, and `readlink -f` isn't
-CURRENT_DIR="$NAGCAT_PYTHON -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' $CURRENT_DIR"
-
-
 nagcat_str="\#{nagcat}"
 nagcat_cmd="$(which nagcat)"
 if [ $? -ne 0 ]; then
-    nagcat_cmd="$NAGCAT_PYTHON $CURRENT_DIR/src/nagcat.py"
+    nagcat_cmd="$(find_python) $CURRENT_DIR/src/nagcat.py"
 fi
 
 
