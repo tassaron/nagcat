@@ -24,7 +24,8 @@ def find_editor():
     try:
         nano_path = subprocess.check_output(["which", "nano"]).decode("utf-8").strip()
     except Exception as e:
-        print(e)
+        if type(e) != FileNotFoundError:
+            print(str(e))
         nano_path = "/usr/bin/nano"
     return os.getenv("EDITOR", nano_path)
 
