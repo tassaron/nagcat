@@ -208,10 +208,16 @@ def create_argparser(main_config: Dict[str, str]) -> argparse.ArgumentParser:
         "suggestion",
         help=f"suggest something for {main_config['name']} to do",
         choices=["config", "pet", "why"],
+        nargs="?",
     )
     parser.add_argument(
         "--reset",
         help="delete all config files and reminder state",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--version",
+        help="print version and exit",
         action="store_true",
     )
 
@@ -251,6 +257,14 @@ def main(
     args = parser.parse_args(sys.argv[1:2])
 
     # At this point argparse has returned 1 or higher if args are bad
+
+    if args.version:
+        try:
+            from . import __version__ as version
+        except ImportError:
+            import __init__.__version__ as version
+        print(version)
+        return 0
 
     if args.suggestion == "config":
         # pass remaining arguments into config subcommand
