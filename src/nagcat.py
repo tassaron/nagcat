@@ -236,8 +236,17 @@ def main(
         from .config import load_all_config, CONFIG_DIR
         from .config import main as config_main
     except ImportError:
-        from config import load_all_config, CONFIG_DIR
-        from config import main as config_main
+        try:
+            from config import load_all_config, CONFIG_DIR
+            from config import main as config_main
+        except ImportError:
+            # last resort to find config.py
+            # seems necessary on Python 3.6
+            sys.path.insert(0, os.path.dirname(__file__))
+            from config import load_all_config, CONFIG_DIR
+            from config import main as config_main
+
+            del sys.path[0]
 
     main_config, reminders = load_all_config()
     if len(argv) < 2:
@@ -262,7 +271,11 @@ def main(
         try:
             from . import __version__ as version
         except ImportError:
-            import __init__.__version__ as version
+            # try to import __init__.py from same directory as this file
+            sys.path.insert(0, os.path.dirname(__file__))
+            from __init__ import __version__ as version
+
+            del sys.path[0]
         print(version)
         return 0
 

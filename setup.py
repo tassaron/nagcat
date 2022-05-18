@@ -35,10 +35,11 @@ setup(
     author=getTextFromFile("AUTHORS", "tassaron"),
     author_email="brianna@rainey.tech",
     long_description=getTextFromFile("README.md", nagcat.__doc__),
-    long_description_content_type = "text/markdown",
+    long_description_content_type="text/markdown",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.10",
         "Environment :: Console",
     ],
