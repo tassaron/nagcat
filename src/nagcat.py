@@ -240,21 +240,21 @@ def main(
         from config import main as config_main
 
     main_config, reminders = load_all_config()
-    if len(sys.argv) < 2:
+    if len(argv) < 2:
         # Plain nagcat command which returns the 'face' or 'alert'
         return nagcat_nag(main_config, reminders, litterbox_dir)
-    elif "--reset" in sys.argv:
+    elif "--reset" in argv:
         return_code = nagcat_reset(main_config, litterbox_dir, CONFIG_DIR)
-        if return_code > 0 or len(sys.argv) == 2:
+        if return_code > 0 or len(argv) == 2:
             return return_code
 
         main_config, reminders = load_all_config()
         # Remove --reset from argv
-        del sys.argv[sys.argv.index("--reset")]
+        del argv[argv.index("--reset")]
 
     parser = create_argparser(main_config)
     # Parse only the suggestion to begin with
-    args = parser.parse_args(sys.argv[1:2])
+    args = parser.parse_args(argv[1:2])
 
     # At this point argparse has returned 1 or higher if args are bad
 
@@ -268,7 +268,7 @@ def main(
 
     if args.suggestion == "config":
         # pass remaining arguments into config subcommand
-        return config_main(sys.argv[2:], litterbox_dir)
+        return config_main(argv[2:], litterbox_dir)
 
     elif args.suggestion == "pet":
         return nagcat_pet(main_config, reminders, litterbox_dir)
@@ -281,4 +281,4 @@ def main(
 
 
 if __name__ == "__main__":
-    exit(main())
+    sys.exit(main())

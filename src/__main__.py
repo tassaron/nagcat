@@ -1,6 +1,8 @@
 """
 Entrypoint for `python -m nagcat` or the nagcat command
 """
+import sys
+
 try:
     from .nagcat import main
 except ImportError:
@@ -8,4 +10,4 @@ except ImportError:
 
 
 if __name__ == "__main__":
-    exit(main())
+    sys.exit(main())
